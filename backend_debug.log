@@ -1,0 +1,159 @@
+2026-03-24 17:24:55,209 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000007'
+2026-03-24 17:24:57,109 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000007
+2026-03-24 17:24:58,707 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000007' and jobTaskType eq 'Posting'
+2026-03-24 17:25:00,272 INFO projects.service: Successfully fetched 11 phases from projectTaskApiPage for project PR-000007
+2026-03-24 17:28:06,101 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000007'
+2026-03-24 17:28:08,033 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000007
+2026-03-24 17:28:09,400 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000007' and jobTaskType eq 'Posting'
+2026-03-24 17:28:10,797 INFO projects.service: Successfully fetched 11 phases from projectTaskApiPage for project PR-000007
+2026-03-24 17:29:05,446 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000007'
+2026-03-24 17:29:07,038 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000007
+2026-03-24 17:29:08,534 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000007' and jobTaskType eq 'Posting'
+2026-03-24 17:29:10,107 INFO projects.service: Successfully fetched 11 phases from projectTaskApiPage for project PR-000007
+2026-03-24 17:33:32,067 INFO projects.service: Fetching project details from projectApiPage with filter: no eq '123'
+2026-03-24 17:33:34,178 ERROR projects.service: Dynamics API projectApiPage failed: 
+2026-03-24 17:33:34,180 ERROR projects.service: Error fetching project 123: 502: projectApiPage request failed
+Traceback (most recent call last):
+  File "C:\Users\AnshKakkar\OneDrive - Meridian Solutions\Desktop\Primus (1)\Primus\Backend\client\dashboard\services.py", line 211, in get_project_dashboard_details
+    project_items = await fetch_dynamics("projectApiPage", token, filter_expr)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\AnshKakkar\OneDrive - Meridian Solutions\Desktop\Primus (1)\Primus\Backend\dynamics\services.py", line 72, in fetch_dynamics
+    raise HTTPException(
+    ...<2 lines>...
+    )
+fastapi.exceptions.HTTPException: 502: projectApiPage request failed
+2026-03-24 17:36:49,893 INFO projects.service: Fetching project details from projectApiPage with filter: no eq '123'
+2026-03-24 17:36:51,809 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project 123
+2026-03-24 17:36:53,334 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq '123' and jobTaskType eq 'Posting'
+2026-03-24 17:36:55,325 INFO projects.service: Successfully fetched 1 phases from projectTaskApiPage for project 123
+2026-03-24 17:37:06,686 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000005'
+2026-03-24 17:37:08,557 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000005
+2026-03-24 17:37:10,477 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000005' and jobTaskType eq 'Posting'
+2026-03-24 17:37:12,073 INFO projects.service: Successfully fetched 0 phases from projectTaskApiPage for project PR-000005
+2026-03-24 17:37:24,814 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000007'
+2026-03-24 17:37:26,434 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000007
+2026-03-24 17:37:27,924 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000007' and jobTaskType eq 'Posting'
+2026-03-24 17:37:29,582 INFO projects.service: Successfully fetched 11 phases from projectTaskApiPage for project PR-000007
+2026-03-24 17:37:58,397 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000008'
+2026-03-24 17:38:00,053 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000008
+2026-03-24 17:38:01,675 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000008' and jobTaskType eq 'Posting'
+2026-03-24 17:38:03,345 INFO projects.service: Successfully fetched 3 phases from projectTaskApiPage for project PR-000008
+2026-03-24 17:38:13,321 INFO projects.service: Fetching project details from projectApiPage with filter: no eq '123'
+2026-03-24 17:38:14,849 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project 123
+2026-03-24 17:38:16,265 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq '123' and jobTaskType eq 'Posting'
+2026-03-24 17:38:17,794 INFO projects.service: Successfully fetched 1 phases from projectTaskApiPage for project 123
+2026-03-24 18:05:31,560 INFO projects.service: Fetching project details from projectApiPage with filter: no eq '123'
+2026-03-24 18:05:37,274 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project 123
+2026-03-24 18:05:39,854 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq '123' and jobTaskType eq 'Posting'
+2026-03-24 18:05:41,711 INFO projects.service: Successfully fetched 1 phases from projectTaskApiPage for project 123
+2026-03-24 18:08:10,221 INFO projects.service: Fetching project details from projectApiPage with filter: no eq '123'
+2026-03-24 18:08:14,580 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project 123
+2026-03-24 18:08:18,403 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq '123' and jobTaskType eq 'Posting'
+2026-03-24 18:08:23,035 INFO projects.service: Fetching project details from projectApiPage with filter: no eq '123'
+2026-03-24 18:08:24,799 INFO projects.service: Successfully fetched 1 phases from projectTaskApiPage for project 123
+2026-03-24 18:08:27,100 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project 123
+2026-03-24 18:08:32,117 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq '123' and jobTaskType eq 'Posting'
+2026-03-24 18:08:34,485 INFO projects.service: Successfully fetched 1 phases from projectTaskApiPage for project 123
+2026-03-24 18:08:54,271 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000005'
+2026-03-24 18:08:57,133 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000005
+2026-03-24 18:08:59,632 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000005' and jobTaskType eq 'Posting'
+2026-03-24 18:09:02,578 INFO projects.service: Successfully fetched 0 phases from projectTaskApiPage for project PR-000005
+2026-03-24 18:09:04,775 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000007'
+2026-03-24 18:09:07,385 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000007
+2026-03-24 18:09:10,106 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000007' and jobTaskType eq 'Posting'
+2026-03-24 18:09:13,206 INFO projects.service: Successfully fetched 11 phases from projectTaskApiPage for project PR-000007
+2026-03-24 18:09:42,421 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000010'
+2026-03-24 18:09:44,870 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000010
+2026-03-24 18:09:47,311 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000010' and jobTaskType eq 'Posting'
+2026-03-24 18:09:50,255 INFO projects.service: Successfully fetched 8 phases from projectTaskApiPage for project PR-000010
+2026-03-24 18:10:22,244 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000057'
+2026-03-24 18:10:25,629 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000057
+2026-03-24 18:10:28,672 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000057' and jobTaskType eq 'Posting'
+2026-03-24 18:10:30,633 INFO projects.service: Successfully fetched 10 phases from projectTaskApiPage for project PR-000057
+2026-03-24 18:11:09,295 INFO projects.service: Fetching project details from projectApiPage with filter: no eq '123'
+2026-03-24 18:11:11,551 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project 123
+2026-03-24 18:11:14,046 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq '123' and jobTaskType eq 'Posting'
+2026-03-24 18:11:16,354 INFO projects.service: Successfully fetched 1 phases from projectTaskApiPage for project 123
+2026-03-24 18:11:27,034 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000005'
+2026-03-24 18:11:29,340 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000005
+2026-03-24 18:11:31,955 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000005' and jobTaskType eq 'Posting'
+2026-03-24 18:11:34,665 INFO projects.service: Successfully fetched 0 phases from projectTaskApiPage for project PR-000005
+2026-03-24 18:11:46,950 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000007'
+2026-03-24 18:11:49,289 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000007
+2026-03-24 18:11:51,650 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000007' and jobTaskType eq 'Posting'
+2026-03-24 18:11:53,853 INFO projects.service: Successfully fetched 11 phases from projectTaskApiPage for project PR-000007
+2026-03-24 18:12:26,936 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000008'
+2026-03-24 18:12:29,290 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000008
+2026-03-24 18:12:31,350 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000008' and jobTaskType eq 'Posting'
+2026-03-24 18:12:33,498 INFO projects.service: Successfully fetched 3 phases from projectTaskApiPage for project PR-000008
+2026-03-24 18:12:55,934 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000010'
+2026-03-24 18:12:58,489 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000010
+2026-03-24 18:13:00,561 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000010' and jobTaskType eq 'Posting'
+2026-03-24 18:13:02,824 INFO projects.service: Successfully fetched 8 phases from projectTaskApiPage for project PR-000010
+2026-03-24 18:13:52,136 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000057'
+2026-03-24 18:13:54,624 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000057
+2026-03-24 18:13:56,895 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000057' and jobTaskType eq 'Posting'
+2026-03-24 18:13:59,230 INFO projects.service: Successfully fetched 10 phases from projectTaskApiPage for project PR-000057
+2026-03-24 18:14:33,392 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000008'
+2026-03-24 18:14:35,891 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000008
+2026-03-24 18:14:38,191 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000008' and jobTaskType eq 'Posting'
+2026-03-24 18:14:40,387 INFO projects.service: Successfully fetched 3 phases from projectTaskApiPage for project PR-000008
+2026-03-24 18:15:00,910 INFO projects.service: Fetching project details from projectApiPage with filter: no eq '123'
+2026-03-24 18:15:03,044 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project 123
+2026-03-24 18:15:05,246 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq '123' and jobTaskType eq 'Posting'
+2026-03-24 18:15:07,330 INFO projects.service: Successfully fetched 1 phases from projectTaskApiPage for project 123
+2026-03-24 18:15:18,482 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000074'
+2026-03-24 18:15:20,496 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000074
+2026-03-24 18:15:22,755 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000074' and jobTaskType eq 'Posting'
+2026-03-24 18:15:24,852 INFO projects.service: Successfully fetched 0 phases from projectTaskApiPage for project PR-000074
+2026-03-24 18:15:34,842 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000075'
+2026-03-24 18:15:37,123 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000075
+2026-03-24 18:15:39,356 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000075' and jobTaskType eq 'Posting'
+2026-03-24 18:15:41,624 INFO projects.service: Successfully fetched 0 phases from projectTaskApiPage for project PR-000075
+2026-03-24 18:15:48,102 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000076'
+2026-03-24 18:15:50,314 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000076
+2026-03-24 18:15:52,827 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000076' and jobTaskType eq 'Posting'
+2026-03-24 18:15:54,840 INFO projects.service: Successfully fetched 0 phases from projectTaskApiPage for project PR-000076
+2026-03-24 18:16:00,435 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000077'
+2026-03-24 18:16:02,623 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000077
+2026-03-24 18:16:04,874 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000077' and jobTaskType eq 'Posting'
+2026-03-24 18:16:07,240 INFO projects.service: Successfully fetched 10 phases from projectTaskApiPage for project PR-000077
+2026-03-24 18:16:40,001 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000078'
+2026-03-24 18:16:42,171 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000078
+2026-03-24 18:16:44,294 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000078' and jobTaskType eq 'Posting'
+2026-03-24 18:16:46,257 INFO projects.service: Successfully fetched 0 phases from projectTaskApiPage for project PR-000078
+2026-03-24 18:17:33,364 INFO projects.service: Fetching project details from projectApiPage with filter: no eq 'PR-000076'
+2026-03-24 18:17:35,391 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project PR-000076
+2026-03-24 18:17:37,505 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq 'PR-000076' and jobTaskType eq 'Posting'
+2026-03-24 18:17:39,590 INFO projects.service: Successfully fetched 0 phases from projectTaskApiPage for project PR-000076
+2026-03-24 18:19:33,027 INFO projects.service: Fetching project details from projectApiPage with filter: no eq '123'
+2026-03-24 18:19:34,773 INFO projects.service: Successfully fetched 1 project records from projectApiPage for project 123
+2026-03-24 18:19:36,147 INFO projects.service: Fetching phases from projectTaskApiPage with filter: jobNo eq '123' and jobTaskType eq 'Posting'
+2026-03-24 18:19:37,680 INFO projects.service: Successfully fetched 1 phases from projectTaskApiPage for project 123
+2026-03-24 18:20:23,696 INFO projects.service: Parallel fetching core data for project 123...
+2026-03-24 18:23:24,397 INFO projects.service: Parallel fetching core data for project 123...
+2026-03-24 18:23:34,916 INFO projects.service: Parallel fetching core data for project 123...
+2026-03-24 18:24:04,388 INFO projects.service: Parallel fetching core data for project PR-000005...
+2026-03-24 18:24:22,434 INFO projects.service: Parallel fetching core data for project PR-000008...
+2026-03-24 18:24:31,602 INFO projects.service: Parallel fetching core data for project PR-000010...
+2026-03-24 18:25:19,560 INFO projects.service: Parallel fetching core data for project PR-000057...
+2026-03-24 18:25:36,891 INFO projects.service: Parallel fetching core data for project PR-000074...
+2026-03-24 18:25:49,226 INFO projects.service: Parallel fetching core data for project PR-000075...
+2026-03-24 18:25:58,154 INFO projects.service: Parallel fetching core data for project PR-000076...
+2026-03-24 18:26:07,857 INFO projects.service: Parallel fetching core data for project PR-000077...
+2026-03-24 18:26:19,578 INFO projects.service: Parallel fetching core data for project PR-000078...
+2026-03-25 00:46:02,681 INFO projects.service: Parallel fetching core data for project 123...
+2026-03-25 00:46:13,807 INFO projects.service: Parallel fetching core data for project 123...
+2026-03-25 01:35:03,182 INFO projects.service: Parallel fetching core data for project PR-000008...
+2026-03-25 01:45:52,020 INFO projects.service: Parallel fetching core data for project 123...
+2026-03-25 01:46:01,985 INFO projects.service: Parallel fetching core data for project 123...
+2026-03-25 10:24:18,268 INFO projects.service: Parallel fetching core data for project 123...
+2026-03-25 10:24:31,036 INFO projects.service: Parallel fetching core data for project 123...
+2026-03-25 10:24:59,252 INFO projects.service: Parallel fetching core data for project PR-000005...
+2026-03-25 10:25:45,297 INFO projects.service: Parallel fetching core data for project PR-000007...
+2026-03-25 10:26:00,432 INFO projects.service: Parallel fetching core data for project PR-000008...
+2026-03-25 10:26:26,105 INFO projects.service: Parallel fetching core data for project PR-000010...
+2026-03-25 10:26:42,820 INFO projects.service: Parallel fetching core data for project PR-000057...
+2026-03-25 10:27:54,894 INFO projects.service: Parallel fetching core data for project 123...
+2026-03-25 10:28:16,139 INFO projects.service: Parallel fetching core data for project PR-000008...
+2026-03-25 10:43:52,366 INFO projects.service: Parallel fetching core data for project 123...
