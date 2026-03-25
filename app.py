@@ -15,7 +15,6 @@ from publications.services import load_data  # for scheduler prewarm/refresh
 from notifications.routes import router as notifications_router
 from surveys.routes import router as surveys_router
 from utils.activity_middleware import ActivityLoggerMiddleware
-
 from admin.routes import AdminService
 
 scheduler = AsyncIOScheduler()

@@ -17,15 +17,18 @@ class EscalationType(str, Enum):
 
 @unique
 class Urgency(str, Enum):
-    LOW    = "low"
-    MEDIUM = "medium"
-    HIGH   = "high"
+    LOW      = "low"
+    MEDIUM   = "medium"
+    HIGH     = "high"
+    CRITICAL = "critical"
 
 
 @unique
 class EscalationStatus(str, Enum):
+    DRAFT        = "draft"
     OPEN         = "open"
     IN_PROGRESS  = "in_progress"
+    RESOLVED     = "resolved"
     CLOSED       = "closed"
 
 

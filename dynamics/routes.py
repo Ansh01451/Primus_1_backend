@@ -1,23 +1,19 @@
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
-from typing import List
-
+from typing import List, Optional
 from pydantic import BaseModel
-# from dynamics.services import fetch_filtered_data
-from .teams import fetch_user_meetings, schedule_meeting, cancel_meeting
+from .teams import fetch_user_meetings, schedule_meeting, cancel_meeting, update_meeting
 from auth.middleware import get_current_user, require_roles
 from auth.roles import Role
-
 
 router = APIRouter(
     prefix="/dynamics", 
     tags=["Dynamics"],
     dependencies=[Depends(require_roles(Role.CLIENT, Role.ADMIN, Role.VENDOR, Role.ALUMNI, Role.ADVISOR))])
 
-
 class MeetingListRequest(BaseModel):
     user_email: str
-    scope: str = "week"  # can be 'week' or 'month'
+    scope: str = "week"  # can be 'week', 'month', or 'past'
 
 class ScheduleMeetingRequest(BaseModel):
     organizer_email: str
@@ -26,76 +22,34 @@ class ScheduleMeetingRequest(BaseModel):
     description: str
     start_time: datetime
     end_time: datetime
+    category: Optional[str] = None
+    agenda: Optional[List[str]] = None
+
+class UpdateMeetingRequest(BaseModel):
+    organizer_email: str
+    meeting_id: str
+    subject: Optional[str] = None
+    description: Optional[str] = None
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    agenda: Optional[List[str]] = None
 
 class CancelMeetingRequest(BaseModel):
     organizer_email: str
     meeting_id: str
     message: str = "The meeting has been cancelled."
 
-
-# @router.get("/projectPlanningLineApiPage")
-# async def project_planning_lines():
-#     fields: List[str] = [
-#         "jobNo", "jobTaskNo", "description", "type", "quantity",
-#         "directUnitCostLCY", "unitPriceLCY", "totalPriceLCY",
-#         "planningDate", "plannedDeliveryDate", "unitOfMeasureCode",
-#         "locationCode", "lineType", "status",
-#         "systemCreatedAt", "systemModifiedAt"
-#     ]
-#     return await fetch_filtered_data("projectPlanningLineApiPage", fields)
-
-
-# @router.get("/projectApiPage")
-# async def projects():
-#     fields = [
-#         "no", "description", "searchDescription", "billToCustomerNo",
-#         "creationDate", "startingDate", "endingDate", "status",
-#         "projectCategory", "bidManager", "overallProjectValue",
-#         "projectDirector", "relationshipDirector", "projectManagerPrimus",
-#         "projectBrief", "functions", "sector", "projectExecution",
-#         "clientType", "sellToCustomerName", "billToName",
-#         "officeLocation", "systemCreatedAt", "systemModifiedAt"
-#     ]
-#     return await fetch_filtered_data("projectApiPage", fields)
-
-
-# @router.get("/documentAttachmentApiPage")
-# async def document_attachments():
-#     fields = [
-#         "no", "documentType", "attachedDate", "fileName", "fileType",
-#         "fileExtension", "attachedBy", "user", "oneDriveLink",
-#         "systemCreatedAt", "systemModifiedAt"
-#     ]
-#     return await fetch_filtered_data("documentAttachmentApiPage", fields)
-
-
-# @router.get("/projectTaskApiPage")
-# async def project_tasks():
-#     fields = [
-#         "jobNo", "jobTaskNo", "description", "jobTaskType",
-#         "scheduleTotalCost", "scheduleTotalPrice", "contractTotalPrice",
-#         "startDate", "endDate", "projectCategory",
-#         "actualBillingAmount", "remainingAmount",
-#         "systemCreatedAt", "systemModifiedAt"
-#     ]
-#     return await fetch_filtered_data("projectTaskApiPage", fields)
-
-
-
 @router.post("/meetings")
 def list_and_save_weekly_meetings(payload: MeetingListRequest, user: dict = Depends(get_current_user)):
     """
-    API route to return user's Teams meetings for this week or month.
+    API route to return user's Teams meetings for this week, month, or past.
     """
-    # Authorization check
     email = (user.get("email") or "").lower()
     req_email = (payload.user_email or "").lower()
     
-    print(f"Dynamics Meeting Auth check: user_email='{email}', payload_user_email='{req_email}'")
-
     if email != req_email and "admin" not in user.get("roles", []):
          raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=403,
             detail=f"User not Authorised to access meetings for {req_email}"
         )
 
@@ -112,21 +66,18 @@ def list_and_save_weekly_meetings(payload: MeetingListRequest, user: dict = Depe
         "count": len(meetings),
         "meetings": meetings,
     }
- 
- 
+
 @router.post("/schedule-meeting")
 def schedule_user_meeting(payload: ScheduleMeetingRequest, user: dict = Depends(get_current_user)):
     """
-    API route to schedule a Teams meeting with a client.
+    API route to schedule a Teams meeting.
     """
     email = (user.get("email") or "").lower()
     req_email = (payload.organizer_email or "").lower()
     
-    print(f"Dynamics Schedule Auth check: user_email='{email}', payload_organizer_email='{req_email}'")
-
     if email != req_email and "admin" not in user.get("roles", []):
          raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=403,
             detail=f"User not Authorised to schedule meetings for {req_email}"
         )
 
@@ -138,6 +89,8 @@ def schedule_user_meeting(payload: ScheduleMeetingRequest, user: dict = Depends(
             payload.description,
             payload.start_time,
             payload.end_time,
+            payload.category,
+            payload.agenda
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -151,8 +104,36 @@ def schedule_user_meeting(payload: ScheduleMeetingRequest, user: dict = Depends(
         "joinUrl": meeting.get("onlineMeeting", {}).get("joinUrl"),
         "meetingId": meeting.get("id"),
     }
- 
- 
+
+@router.patch("/reschedule-meeting")
+def reschedule_user_meeting(payload: UpdateMeetingRequest, user: dict = Depends(get_current_user)):
+    """
+    API route to reschedule (update) an existing Teams meeting.
+    """
+    email = (user.get("email") or "").lower()
+    req_email = (payload.organizer_email or "").lower()
+    
+    if email != req_email and "admin" not in user.get("roles", []):
+         raise HTTPException(
+            status_code=403,
+            detail=f"User not Authorised to update meetings for {req_email}"
+        )
+
+    try:
+        updated_meeting = update_meeting(
+            payload.organizer_email,
+            payload.meeting_id,
+            payload.subject,
+            payload.description,
+            payload.start_time,
+            payload.end_time,
+            payload.agenda
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+  
+    return updated_meeting
+
 @router.post("/cancel-meeting")
 def cancel_user_meeting(payload: CancelMeetingRequest, user: dict = Depends(get_current_user)):
     """
@@ -161,11 +142,9 @@ def cancel_user_meeting(payload: CancelMeetingRequest, user: dict = Depends(get_
     email = (user.get("email") or "").lower()
     req_email = (payload.organizer_email or "").lower()
     
-    print(f"Dynamics Cancel Auth check: user_email='{email}', payload_organizer_email='{req_email}'")
-
     if email != req_email and "admin" not in user.get("roles", []):
          raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=403,
             detail=f"User not Authorised to cancel meetings for {req_email}"
         )
 

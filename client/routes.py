@@ -5,13 +5,13 @@ from typing import Any, Dict, List, Optional, Tuple
 from datetime import datetime
 
 from pydantic import BaseModel, EmailStr
-from .dashboard.services import fetch_client_projects_by_email, get_project_dashboard_details, TeamMemberOut, fetch_project_team_members, get_document_attachments_for_project, get_attachment_and_stream
+from .dashboard.services import fetch_client_projects_by_email, get_project_dashboard_details, TeamMemberOut, fetch_project_team_members, get_document_attachments_for_project, get_attachment_and_stream, get_team_stats
 from .escalations.services import EscalationService
 from .escalations.models import EscalationIn, EscalationOut
 from .dashboard.models import DashboardOverview, ProjectDetailsOut
 from .feedback.models import FeedbackIn, FeedbackUpdate
-from .feedback.enums import FeedbackCategory, AttachmentCategory
-from .feedback.services import create_feedback, get_feedback_by_id, list_feedback, update_feedback_by_id
+from .feedback.enums import FeedbackCategory, AttachmentCategory, Visibility, FeedbackStatus
+from .feedback.services import create_feedback, get_feedback_by_id, list_feedback, update_feedback_by_id, get_feedback_stats
 from .escalations.enums import EscalationType, Urgency
 from auth.middleware import get_current_user, require_roles
 from auth.roles import Role
@@ -41,6 +41,7 @@ ALLOWED_FILE_TYPES = {
     "application/pdf",  # .pdf
     "application/msword",  # .doc (Microsoft Word 97-2003)
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",  # .docx (modern Word)
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",      # .xlsx (Excel)
     "image/png",  # .png
     "image/jpeg"  # .jpg, .jpeg
 }
@@ -126,9 +127,23 @@ async def create_escalation(
         urgency=Urgency(urgency),
         subject=subject,
         description=description,
+        is_draft=is_draft, # NEW
         execution_date=execution_date
     )
     return await EscalationService.create_escalation(data, file_contents, user=user)
+
+
+@router.get(
+    "/escalations/stats",
+    response_model=Dict[str, Any],
+    summary="Get aggregate statistics for Reach Out tickets",
+    dependencies=[Depends(get_current_user)]
+)
+async def get_escalation_stats_route(user: dict = Depends(get_current_user)):
+    """
+    Returns counts for Open, High Priority, Resolved tickets and average response time.
+    """
+    return await EscalationService.get_escalation_stats(user)
 
 
 @router.get(
@@ -210,6 +225,15 @@ async def get_project_team_members_route(project_no: str):
     return members
 
 
+@router.get("/project/{project_no}/team-stats", response_model=Dict[str, Any])
+async def get_team_stats_route(project_no: str):
+    """
+    Return aggregate statistics for a project team.
+    """
+    stats = await get_team_stats(project_no)
+    return stats
+
+
 
 ##############################  FEEDBACK  ##############################
 
@@ -223,9 +247,11 @@ async def post_feedback(
     team_member_id: Optional[str] = Form(None),
     milestone_name: Optional[str] = Form(None),
     communication_quality: Optional[int] = Form(None),
-    team_collaboration: Optional[int] = Form(None),
-    solution_quality: Optional[int] = Form(None),
+    expertise_quality: Optional[int] = Form(None),  # Renamed
+    timeliness_quality: Optional[int] = Form(None),    # Renamed
     overall_satisfaction: Optional[int] = Form(None),
+    visibility: str = Form("internal"),
+    is_draft: bool = Form(False),             # NEW
     comments: Optional[str] = Form(None),
     feedback_attachments_experience_letter: List[UploadFile] = File([]),        # NEW
     feedback_attachments_appreciation_letter: List[UploadFile] = File([]),     # NEW
@@ -280,19 +306,34 @@ async def post_feedback(
         client_email=client_email,
         project_no=project_no,
         project_name=project_name,
-        category=FeedbackCategory(normalized_type),
+        category=normalized_type, # Using normalized_type string
         team_member_id=team_member_id,
-        communication_quality=communication_quality,
-        team_collaboration=team_collaboration,
-        solution_quality=solution_quality,
-        overall_satisfaction=overall_satisfaction,
-        comments=comments,
         milestone_name=milestone_name_value,
+        communication_quality=communication_quality,
+        expertise_quality=expertise_quality, # Renamed
+        timeliness_quality=timeliness_quality,   # Renamed
+        overall_satisfaction=overall_satisfaction,
+        visibility=Visibility(visibility.lower()),
+        is_draft=is_draft, # NEW
+        comments=comments
     )
     print("4")  
     print("Payload received at API:", feedback_payload)
     created = await create_feedback(feedback_payload, file_contents)
     return created
+
+
+@router.get(
+    "/feedback/stats",
+    response_model=Dict[str, Any],
+    summary="Get aggregate statistics for Feedback cards",
+    dependencies=[Depends(get_current_user)]
+)
+async def get_feedback_stats_route(user: dict = Depends(get_current_user)):
+    """
+    Returns counts for Total Feedback, Average Rating, and Resolved Feedback.
+    """
+    return await get_feedback_stats(user)
 
 
 class FeedbackFilter(BaseModel):
@@ -363,6 +404,28 @@ async def download_project_attachment_content(payload: FileRequest):
     Stream the attachment content back to the client.
     """
     return await get_attachment_and_stream(payload.file_name)
+
+
+@router.get("/document-library/stats", response_model=Dict[str, Any])
+async def api_get_document_library_stats(user: dict = Depends(get_current_user)):
+    """
+    Get aggregate stats for Document Library: total, recent, pending.
+    """
+    client_email = user.get("user_email") or user.get("email")
+    if not client_email:
+        raise HTTPException(status_code=401, detail="Missing user email")
+    return await get_document_library_stats(client_email)
+
+
+@router.get("/document-library/folders", response_model=List[Dict[str, Any]])
+async def api_get_document_library_folders(user: dict = Depends(get_current_user)):
+    """
+    Get unique document categories (folders) and their counts.
+    """
+    client_email = user.get("user_email") or user.get("email")
+    if not client_email:
+        raise HTTPException(status_code=401, detail="Missing user email")
+    return await get_document_folders(client_email)
 
 
 

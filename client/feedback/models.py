@@ -3,6 +3,7 @@ from typing import Dict, List, Optional
 from pydantic import BaseModel, Field, EmailStr
 from bson import ObjectId
 from .db import PyObjectId
+from .enums import FeedbackCategory, Visibility, FeedbackStatus
 
 
 
@@ -14,9 +15,11 @@ class FeedbackIn(BaseModel):
     team_member_id: Optional[str] = None
     milestone_name: Optional[str] = None
     communication_quality: Optional[int] = Field(None, ge=1, le=5)
-    team_collaboration: Optional[int] = Field(None, ge=1, le=5)
-    solution_quality: Optional[int] = Field(None, ge=1, le=5)
+    expertise_quality: Optional[int] = Field(None, ge=1, le=5) # Renamed from team_collaboration
+    timeliness_quality: Optional[int] = Field(None, ge=1, le=5)  # Renamed from solution_quality
     overall_satisfaction: Optional[int] = Field(None, ge=1, le=5)
+    visibility: Visibility = Visibility.INTERNAL
+    is_draft: bool = False             # NEW: support Save Draft
     comments: Optional[str] = None
     
 
@@ -31,9 +34,12 @@ class FeedbackDB(BaseModel):
     team_member_id: Optional[str] = None
     milestone_name: Optional[str] = None
     communication_quality: Optional[int] = None
-    team_collaboration: Optional[int] = None
-    solution_quality: Optional[int] = None
+    expertise_quality: Optional[int] = None
+    timeliness_quality: Optional[int] = None
     overall_satisfaction: Optional[int] = None
+    visibility: Visibility = Visibility.INTERNAL
+    status: FeedbackStatus = FeedbackStatus.OPEN
+    is_draft: bool = False             # NEW: support Save Draft
     comments: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.now())
     feedback_attachments_experience_letter: Optional[List[Dict[str, str]]] = Field(default_factory=list)

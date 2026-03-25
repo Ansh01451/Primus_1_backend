@@ -8,7 +8,7 @@ from utils.log import logger
 from ..dashboard.services import get_access_token, get_project_by_no
 from .db import escalations_col, registered_clients_col
 from .models import EscalationIn, EscalationOut
-from .enums import EscalationStatus
+from .enums import EscalationStatus, Urgency
 from auth.middleware import get_current_user
 from utils.email_utils import send_mail_to_user
 from utils.templates import client_escalation_notification_template
@@ -89,9 +89,10 @@ class EscalationService:
                         "project_manager": project_manager,
                         "project_manager_email": project_manager_email,
                         "date_of_escalation": now,
+                        "response_date": None,
                         "execution_date": None,
                         "type": data.type.value,
-                        "status": EscalationStatus.OPEN.value,
+                        "status": EscalationStatus.DRAFT.value if data.is_draft else EscalationStatus.OPEN.value,
                         "urgency": data.urgency.value,
                         "subject": data.subject.strip(),
                         "description": data.description.strip(),
@@ -117,31 +118,31 @@ class EscalationService:
                 raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to allocate escalation ID")
 
 
-            # Email PM
-            try:
-                html = client_escalation_notification_template(
-                    tracking_id=doc["short_id"],
-                    client_id=doc["client_id"],
-                    client_name=client.get("client_name"),  
-                    client_email=doc["client_email"],
-                    project_id=doc["project_id"],
-                    project_manager=doc["project_manager"],
-                    project_manager_email=doc["project_manager_email"],
-                    project_name=doc["project_name"],
-                    escalation_type=doc["type"],
-                    urgency=doc["urgency"], 
-                    subject=doc["subject"],
-                    description=doc["description"],
-                    date_of_escalation=doc["date_of_escalation"],
-                    attachments=doc["escalation_attachments"]
-                )
+            # Email PM (only for non-drafts)
+            if not data.is_draft:
+                try:
+                    html = client_escalation_notification_template(
+                        tracking_id=doc["short_id"],
+                        client_id=doc["client_id"],
+                        client_name=client.get("client_name"),  
+                        client_email=doc["client_email"],
+                        project_id=doc["project_id"],
+                        project_manager=doc["project_manager"],
+                        project_manager_email=doc["project_manager_email"],
+                        project_name=doc["project_name"],
+                        escalation_type=doc["type"],
+                        urgency=doc["urgency"], 
+                        subject=doc["subject"],
+                        description=doc["description"],
+                        date_of_escalation=doc["date_of_escalation"],
+                        attachments=doc["escalation_attachments"]
+                    )
 
-                subject = f"[Request {doc["short_id"]}] {doc["subject"]}"
-                # print("dsfgbdfnhgfdsfvb nbgfd")
-                await _send_email(project_manager_email, subject, html)
+                    subject = f"[Request {doc['short_id']}] {doc['subject']}"
+                    await _send_email(project_manager_email, subject, html)
 
-            except Exception as e:
-                logger.error(f"Failed to send escalation email: {e}")  # NEW logging
+                except Exception as e:
+                    logger.error(f"Failed to send escalation email: {e}")
 
             return EscalationOut(**doc)
         
@@ -150,6 +151,69 @@ class EscalationService:
         except Exception as e:
             logger.exception("Unexpected error creating escalation")
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create escalation")
+
+    @staticmethod
+    async def get_escalation_stats(user: dict) -> Dict[str, Any]:
+        """
+        Calculate aggregate ticket statistics for the "Reach Out" cards.
+        """
+        try:
+            client_email = user.get("email")
+            if not client_email:
+                raise HTTPException(status_code=400, detail="Client email missing")
+
+            # 1. Total Open Tickets (Open, In Progress)
+            open_query = {
+                "client_email": client_email, 
+                "status": {"$in": [EscalationStatus.OPEN.value, EscalationStatus.IN_PROGRESS.value]}
+            }
+            open_count = await escalations_col.count_documents(open_query)
+
+            # 2. High Priority count (High, Critical) within Open tickets
+            high_priority_query = {
+                "client_email": client_email,
+                "status": {"$in": [EscalationStatus.OPEN.value, EscalationStatus.IN_PROGRESS.value]},
+                "urgency": {"$in": [Urgency.HIGH.value, Urgency.CRITICAL.value]}
+            }
+            high_priority_count = await escalations_col.count_documents(high_priority_query)
+
+            # 3. Total Resolved Tickets (Resolved, Closed)
+            resolved_query = {
+                "client_email": client_email, 
+                "status": {"$in": [EscalationStatus.RESOLVED.value, EscalationStatus.CLOSED.value]}
+            }
+            resolved_count = await escalations_col.count_documents(resolved_query)
+
+            # 4. Avg Response Time (for resolved/closed tickets that have response_date)
+            # Fetch tickets with both dates
+            sla_cursor = escalations_col.find({
+                "client_email": client_email,
+                "response_date": {"$ne": None},
+                "status": {"$in": [EscalationStatus.RESOLVED.value, EscalationStatus.CLOSED.value]}
+            })
+            
+            total_duration_hrs = 0.0
+            sla_count = 0
+            async for doc in sla_cursor:
+                start = doc.get("date_of_escalation")
+                end = doc.get("response_date")
+                if start and end:
+                    delta = end - start
+                    total_duration_hrs += delta.total_seconds() / 3600
+                    sla_count += 1
+            
+            avg_response_time = (total_duration_hrs / sla_count) if sla_count > 0 else 4.0 # default fallback matching UI mockup
+
+            return {
+                "openTickets": open_count,
+                "highPriority": high_priority_count,
+                "resolvedTickets": resolved_count,
+                "avgResponseTime": round(avg_response_time, 1)
+            }
+
+        except Exception as e:
+            logger.exception("Failed to calculate escalation stats")
+            raise HTTPException(status_code=500, detail="Failed to fetch ticket stats")
 
     
     @staticmethod

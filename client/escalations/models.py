@@ -11,6 +11,7 @@ class EscalationIn(BaseModel):
     urgency: Urgency
     subject: str
     description: str
+    is_draft: bool = False             # NEW: support Save Draft
     execution_date: Optional[datetime] = None
 
 class EscalationOut(BaseModel):
@@ -25,6 +26,7 @@ class EscalationOut(BaseModel):
     project_manager: str
     project_manager_email: EmailStr
     date_of_escalation: datetime
+    response_date: Optional[datetime] = None  # NEW: for SLA tracking
     type: str
     status: EscalationStatus
     urgency: Urgency

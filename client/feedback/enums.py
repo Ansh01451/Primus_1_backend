@@ -14,6 +14,19 @@ class FeedbackCategory(str, Enum):
 
 
 
+@unique
+class Visibility(str, Enum):
+    INTERNAL = "internal"
+    EXTERNAL = "external"
+
+
+@unique
+class FeedbackStatus(str, Enum):
+    DRAFT    = "draft"
+    OPEN     = "open"
+    RESOLVED = "resolved"
+
+
 class AttachmentCategory(str, Enum):
     EXPERIENCE_LETTER = "experience_letter"
     APPRECIATION_LETTER = "appreciation_letter"

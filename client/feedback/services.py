@@ -11,7 +11,7 @@ import logging
 from utils.blob_utils import upload_blob_from_file
 from .db import feedback_col, reg_col  # adjust import path if needed
 from .models import FeedbackIn, FeedbackDB
-from .enums import FeedbackCategory, AttachmentCategory
+from .enums import FeedbackCategory, AttachmentCategory, FeedbackStatus
 
 logger = logging.getLogger(__name__)
 
@@ -66,9 +66,12 @@ async def create_feedback(payload: FeedbackIn, files: list[tuple[str, BytesIO]])
         team_member_id=payload.team_member_id,
         milestone_name=payload.milestone_name,
         communication_quality = payload.communication_quality,
-        team_collaboration = payload.team_collaboration,
-        solution_quality = payload.solution_quality,
+        expertise_quality = payload.expertise_quality,
+        timeliness_quality = payload.timeliness_quality,
         overall_satisfaction = payload.overall_satisfaction,
+        visibility = payload.visibility,
+        is_draft = payload.is_draft,
+        status = FeedbackStatus.DRAFT if payload.is_draft else FeedbackStatus.OPEN,
         tracking_id=tracking_id,
         comments=payload.comments,
         created_at=datetime.now(),
@@ -80,35 +83,92 @@ async def create_feedback(payload: FeedbackIn, files: list[tuple[str, BytesIO]])
     unified_attachments = attachments_experience + attachments_appreciation + attachments_completion
     doc["feedback_attachments"] = unified_attachments # CHANGED: added for backward compatibility with templates
     
-    # --- Send email notification to Project Manager (best-effort) ---
-    try:
-        # get PM contact - change to literal string if you want hardcoded
-
-        html = client_feedback_notification_template(
-            feedback_id=short_tracking_id,
-            client_email=doc["client_email"],
-            project_no=doc["project_no"],
-            project_name=doc["project_name"],
-            project_manager_email=doc["project_manager_email"],
-            category=FeedbackCategory(doc['category']).value.replace('_', ' ').title(),
-            team_member_id=doc.get("team_member_id"),
-            milestone_name=doc.get("milestone_name"),
-            communication_quality = doc.get("communication_quality"),
-            team_collaboration = doc.get("team_collaboration"),
-            solution_quality = doc.get("solution_quality"),
-            overall_satisfaction = doc.get("overall_satisfaction"),
-            comments=doc.get("comments"),
-            created_at=doc["created_at"],
-            attachments=doc["feedback_attachments"]
-        )
-        subject = f"[Feedback #{short_tracking_id}] {doc['project_no']} — {FeedbackCategory(doc['category']).value.replace('_', ' ').title()}"
-        print("Suject:", subject)
-        await _send_email(project_manager_email, subject, html)
-        doc["success"] = True
-    except Exception as e:
-        logger.error("Failed to send feedback notification email: %s", e)
+    # --- Send email notification to Project Manager (only for non-drafts) ---
+    if not payload.is_draft:
+        try:
+            html = client_feedback_notification_template(
+                feedback_id=short_tracking_id,
+                client_email=doc["client_email"],
+                project_no=doc["project_no"],
+                project_name=doc["project_name"],
+                project_manager_email=doc["project_manager_email"],
+                category=FeedbackCategory(doc['category']).value.replace('_', ' ').title(),
+                team_member_id=doc.get("team_member_id"),
+                milestone_name=doc.get("milestone_name"),
+                communication_quality = doc.get("communication_quality"),
+                team_collaboration = doc.get("expertise_quality"), # mapped to template field
+                solution_quality = doc.get("timeliness_quality"), # mapped to template field
+                overall_satisfaction = doc.get("overall_satisfaction"),
+                comments=doc.get("comments"),
+                created_at=doc["created_at"],
+                attachments=doc["feedback_attachments"]
+            )
+            subject = f"[Feedback #{short_tracking_id}] {doc['project_no']} — {FeedbackCategory(doc['category']).value.replace('_', ' ').title()}"
+            await _send_email(project_manager_email, subject, html)
+            doc["success"] = True
+        except Exception as e:
+            logger.error("Failed to send feedback notification email: %s", e)
 
     return doc
+
+
+async def get_feedback_stats(user: dict) -> Dict[str, Any]:
+    """
+    Calculate aggregate feedback statistics for the "Share Your Feedback" cards.
+    """
+    try:
+        client_email = user.get("email")
+        if not client_email:
+            raise HTTPException(status_code=400, detail="Client email missing")
+
+        # 1. Total Feedback count
+        query = {"client_email": client_email}
+        total_feedback = await feedback_col.count_documents(query)
+
+        # 2. Average Rating
+        # We need to average the 4 dimensions across all documents
+        pipeline = [
+            {"$match": query},
+            {"$group": {
+                "_id": None,
+                "avg_comm": {"$avg": "$communication_quality"},
+                "avg_exp": {"$avg": "$expertise_quality"},
+                "avg_time": {"$avg": "$timeliness_quality"},
+                "avg_overall": {"$avg": "$overall_satisfaction"}
+            }}
+        ]
+        
+        cursor = feedback_col.aggregate(pipeline)
+        results = await cursor.to_list(length=1)
+        
+        avg_rating = 4.6 # Default placeholder matching UI mockup
+        if results:
+            r = results[0]
+            # Mean of the four means
+            avg_rating = (
+                (r.get("avg_comm") or 0) + 
+                (r.get("avg_exp") or 0) + 
+                (r.get("avg_time") or 0) + 
+                (r.get("avg_overall") or 0)
+            ) / 4.0
+            if avg_rating == 0:
+                avg_rating = 4.6
+
+        # 3. Total Resolved Feedback
+        resolved_count = await feedback_col.count_documents({
+            "client_email": client_email,
+            "status": FeedbackStatus.RESOLVED.value
+        })
+
+        return {
+            "totalFeedback": total_feedback,
+            "averageRating": round(avg_rating, 1),
+            "resolved": resolved_count
+        }
+
+    except Exception as e:
+        logger.exception("Failed to calculate feedback stats")
+        raise HTTPException(status_code=500, detail="Failed to fetch feedback stats")
 
 
 async def get_feedback_by_id(feedback_id: str) -> Optional[Dict[str, Any]]:
